@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CursorLens</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell" aria-label="CursorLens 浮窗">
+      <header class="titlebar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>CursorLens</span>
+          <span id="captureBadge" class="badge">600 × 600</span>
+        </div>
+        <div class="window-actions">
+          <button id="refreshButton" class="icon-button" type="button" title="重新截取" aria-label="重新截取">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.4 6.2A6.5 6.5 0 1 0 16 12h-2a4.5 4.5 0 1 1-.3-3.5L11 11h6V5l-1.6 1.2Z" /></svg>
+          </button>
+          <button id="settingsButton" class="icon-button" type="button" title="设置" aria-label="设置">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m11.2 2 .4 1.7c.4.1.8.3 1.1.5l1.5-.8 1.4 1.4-.8 1.5.5 1.1 1.7.4v2l-1.7.4-.5 1.1.8 1.5-1.4 1.4-1.5-.8-1.1.5-.4 1.7h-2L8.8 14l-1.1-.5-1.5.8-1.4-1.4.8-1.5-.5-1.1-1.7-.4v-2l1.7-.4.5-1.1-.8-1.5 1.4-1.4 1.5.8 1.1-.5L9.2 2h2ZM10.2 7A2 2 0 1 0 10 11a2 2 0 0 0 .2-4Z" /></svg>
+          </button>
+          <button id="closeButton" class="icon-button" type="button" title="隐藏" aria-label="隐藏">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 5.5 9 9m0-9-9 9" /></svg>
+          </button>
+        </div>
+      </header>
+
+      <section id="assistantView" class="view">
+        <div id="preview" class="preview" aria-label="鼠标周围截图">
+          <img id="screenshot" alt="鼠标周围的屏幕截图" />
+          <span id="pointerMarker" class="pointer-marker" aria-label="鼠标指向位置"></span>
+          <div id="previewEmpty" class="preview-empty">
+            <span class="preview-glyph" aria-hidden="true">⌖</span>
+            <span id="previewMessage">正在获取鼠标附近画面…</span>
+            <button id="screenPermissionButton" class="text-button hidden" type="button">打开屏幕录制权限</button>
+          </div>
+          <div class="preview-caption">
+            <span id="captureStatus">局部上下文</span>
+            <span id="pointerPosition"></span>
+          </div>
+        </div>
+
+        <section id="answerPanel" class="answer-panel hidden" aria-live="polite">
+          <div class="answer-label"><span class="pulse-dot"></span>回答</div>
+          <div id="answerText" class="answer-text"></div>
+        </section>
+
+        <form id="questionForm" class="composer">
+          <textarea
+            id="questionInput"
+            rows="2"
+            maxlength="4000"
+            placeholder="问问鼠标所指的内容…"
+            aria-label="问题"
+          ></textarea>
+          <button id="askButton" class="ask-button" type="submit" aria-label="发送问题">↑</button>
+        </form>
+        <div class="footer-hint">
+          <span><kbd>Enter</kbd> 发送 · <kbd>Shift Enter</kbd> 换行</span>
+          <span id="apiHint" class="warning-hint hidden">尚未配置 API Key</span>
+        </div>
+      </section>
+
+      <section id="settingsView" class="view settings-view hidden" aria-label="设置">
+        <div class="settings-heading">
+          <div>
+            <h1>设置</h1>
+            <p>修改后会立即重启快捷键监听。</p>
+          </div>
+          <button id="settingsBackButton" class="text-button" type="button">完成</button>
+        </div>
+
+        <form id="settingsForm" class="settings-form">
+          <label>
+            <span>API Key</span>
+            <input id="apiKeyInput" type="password" autocomplete="off" placeholder="sk-…（留空则保留）" />
+            <small id="apiKeyState">未配置</small>
+          </label>
+          <label>
+            <span>模型</span>
+            <input id="modelInput" type="text" />
+          </label>
+          <label>
+            <span>API 地址</span>
+            <input id="baseUrlInput" type="url" spellcheck="false" />
+          </label>
+
+          <div class="field-grid">
+            <label>
+              <span>截取尺寸</span>
+              <select id="captureSizeInput">
+                <option value="400">400 × 400</option>
+                <option value="600">600 × 600</option>
+                <option value="800">800 × 800</option>
+                <option value="1000">1000 × 1000</option>
+              </select>
+            </label>
+            <label>
+              <span>触发方式</span>
+              <select id="triggerModeInput">
+                <option value="press">按一次（推荐）</option>
+                <option value="hold">长按</option>
+              </select>
+            </label>
+          </div>
+
+          <label id="holdDurationField">
+              <span>长按时长</span>
+              <select id="holdDurationInput">
+                <option value="350">350 ms</option>
+                <option value="500">500 ms</option>
+                <option value="700">700 ms</option>
+                <option value="1000">1000 ms</option>
+              </select>
+          </label>
+
+          <label>
+            <span>快捷键</span>
+            <input id="hotkeyInput" type="text" spellcheck="false" placeholder="Command+Shift+Space" />
+            <small>支持 Command / Option / Control / Shift 加字母、数字、Space 或 F1–F12。</small>
+          </label>
+
+          <div class="permission-row">
+            <div>
+              <strong>macOS 权限</strong>
+              <small>首次授权后请重新启动应用。</small>
+            </div>
+            <button id="inputPermissionButton" class="secondary-button" type="button">输入监控</button>
+            <button id="settingsScreenPermissionButton" class="secondary-button" type="button">屏幕录制</button>
+          </div>
+
+          <div id="settingsMessage" class="settings-message" role="status"></div>
+          <button class="save-button" type="submit">保存设置</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "hotkey": "Command+Shift+Space",
+  "triggerMode": "press",
+  "holdDurationMs": 500,
+  "captureSize": 600,
+  "model": "gpt-4.1-mini",
+  "baseUrl": "https://api.openai.com/v1",
+  "apiKey": ""
+}
